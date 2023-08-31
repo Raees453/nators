@@ -1,0 +1,5 @@
+{
+    "workbench.startupEditor": "none",
+    "prettier.singleQuote": true,
+    "editor.tabSize": 2
+}
