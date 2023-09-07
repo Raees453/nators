@@ -6,9 +6,14 @@ const handleCastErrorForDB = err => {
     return new ApiError(message, 400);
 }
 
+const handleInvalidTokenError = () => new ApiError('Please login again to get access', 401);
+
+const handleTokenExpiredError = () => new ApiError('Your session has expired. Please login again', 401);
+
 module.exports = globalErrorHandler = (error, req, res, next) => {
-    // error.statusCode = error.statusCode || 500;
-    // error.status = error.status || 'error';
+    error.statusCode = error.statusCode || 500;
+    error.status = error.status || 'error';
+    error.message = error.message || 'Something went wrong';
 
     const env = process.env.NODE_ENV;
 
@@ -17,8 +22,17 @@ module.exports = globalErrorHandler = (error, req, res, next) => {
         console.log("PRODUCTION RUNNING!!!!\n", error);
 
         let apiError = {...error};
+
         if (apiError.name === 'CastError') {
             apiError = handleCastErrorForDB(apiError);
+        }
+
+        if (apiError.name === 'JsonWebTokenError') {
+            apiError = handleInvalidTokenError();
+        }
+
+        if (apiError.name === 'TokenExpiredError') {
+            apiError = handleTokenExpiredError();
         }
 
         sendProductionError(apiError, res);
@@ -31,7 +45,7 @@ module.exports = globalErrorHandler = (error, req, res, next) => {
 
 
 const sendDevelopmentError = (error, res) => {
-    res.status(error.statusCode).json({
+    res.status(error.statusCode || 500).json({
         status: error.status,
         message: error.message,
         error: error,
@@ -41,12 +55,13 @@ const sendDevelopmentError = (error, res) => {
 
 const sendProductionError = (error, res) => {
     if (error.isOperational) {
-        console.log("Is Operational called!");
+        console.log("Is Operational called!", error);
 
         res.status(error.statusCode).json({
             status: error.status,
             message: error.message
         });
+
     } else {
 
         // console.error(error);

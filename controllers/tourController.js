@@ -3,6 +3,7 @@ const FilterApi = require("../utils/filter_api");
 const APIError = require("../utils/api_error");
 const asyncHandler = require("../utils/async_handler");
 
+
 exports.top5Cheap = async (req, res, next) => {
     req.query.limit = 5;
     req.query.page = 1;
@@ -16,7 +17,7 @@ exports.getTours = asyncHandler(async (req, res, next) => {
 
     const tours = await filterApi.query;
 
-    res.status(200).json({
+    return res.status(200).json({
         status: "success", length: tours.length, tours
     });
 });
@@ -24,7 +25,7 @@ exports.getTours = asyncHandler(async (req, res, next) => {
 exports.getTourById = asyncHandler(async (req, res, next) => {
     const id = req.params.id;
 
-    const tour = await Tour.findById(id);
+    const tour = await Tour.findById(id, '-__v');
 
     // TODO
     if (!tour) {

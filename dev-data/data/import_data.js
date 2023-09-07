@@ -9,7 +9,7 @@ const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours-simple.json`, "utf-
 
 dotenv.config({"path": "./config.env"});
 
-const DB_URL = process.env.DATABASE.replace("<PASSWORD>", process.env.DATABASE_PASSWORD);
+const DB_URL = process.env.DATABASE.replace("<password>", process.env.DATABASE_PASSWORD);
 
 mongoose.connect(DB_URL, {useNewUrlParser: true, useUnifiedTopology: true}).then(() => {
     console.log("Database Connection Successful!");
@@ -37,6 +37,6 @@ const clear = async () => {
 
 if (process.argv[2] === "--clear") {
     clear()
-} else if (process.argv[2] == "--insert") {
+} else if (process.argv[2] === "--insert") {
     insert();
 }
