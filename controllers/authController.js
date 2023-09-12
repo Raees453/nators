@@ -9,14 +9,39 @@ const asyncHandler = require('../utils/async_handler');
 const { sendEmail } = require('../utils/email');
 
 const signToken = (id) => {
-  const secret = process.env.JWT_SECTET;
+  const secret = process.env.JWT_SECRET;
   const expiresIn = process.env.JWT_EXPIRES_IN;
+
   return jwt.sign({ id }, secret, { expiresIn });
 };
 
-const verifyToken = (token) => {
-  const secret = process.env.JWT_SECTET;
-  return promisify(jwt.verify)(token, secret);
+const verifyToken = promisify(jwt.verify);
+
+// const verifyToken = (token) => {
+//   const secret = process.env.JWT_SECTET;
+//   return promisify(jwt.verify)(token, secret);
+// };
+
+const sendResponse = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
+  }
+
+  res.cookie('jwt', token, cookieOptions);
+
+  res.status(statusCode).json({
+    status: true,
+    data: user,
+  });
 };
 
 exports.signUp = asyncHandler(async (req, res, next) => {
@@ -29,13 +54,7 @@ exports.signUp = asyncHandler(async (req, res, next) => {
     confirmPassword,
   });
 
-  const token = signToken(user._id);
-
-  res.status(201).json({
-    status: true,
-    token,
-    data: user,
-  });
+  sendResponse(user, 201, res);
 });
 
 exports.login = asyncHandler(async (req, res, next) => {
@@ -76,7 +95,8 @@ exports.authorize = asyncHandler(async (req, res, next) => {
 
   // Validate token
   const token = authorization.split(' ')[1];
-  const userDetailsObject = await verifyToken(token);
+  const secret = process.env.JWT_SECRET;
+  const userDetailsObject = await verifyToken(token, secret);
 
   // Check if user still exists
   const user = await User.findById(userDetailsObject.id);
@@ -175,12 +195,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   await user.saveForce(true);
 
-  const signedToken = signToken(user._id);
-
-  res.status(200).json({
-    success: true,
-    token: signedToken,
-  });
+  sendResponse(user, 200, res);
 });
 
 exports.updatePassword = asyncHandler(async (req, res, next) => {
@@ -215,13 +230,5 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
 
   await user.saveForce(true);
 
-  req.user = user;
-
-  // login with new password
-  const signedToken = signToken(id);
-
-  res.status(200).json({
-    success: true,
-    token: signedToken,
-  });
+  sendResponse(user, 200, res);
 });

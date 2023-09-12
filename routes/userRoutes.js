@@ -2,6 +2,7 @@ const express = require('express');
 
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
+const usersController = require('../controllers/usersController');
 
 const router = express.Router();
 
@@ -19,10 +20,15 @@ router.patch(
   authController.updatePassword,
 );
 
-router.patch(
-  '/update-user',
+router.patch('/update-me', authController.authorize, userController.updateMe);
+
+router.delete('/delete-me', authController.authorize, userController.deleteMe);
+
+router.get(
+  '/',
   authController.authorize,
-  userController.updateMyData,
+  // authController.checkIfUserRoleIsValid('admin'),
+  usersController.getAllUsers,
 );
 
 module.exports = router;
