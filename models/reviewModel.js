@@ -12,10 +12,12 @@ const reviewSchema = new mongoose.Schema({
   tour: {
     type: Schema.Types.ObjectId,
     ref: 'Tour',
+    required: [true, 'Please provide a tour id'],
   },
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',
+    required: [true, 'Please provide a user id'],
   },
   createdAt: { type: Date, default: Date.now, select: false },
 });
@@ -23,19 +25,12 @@ const reviewSchema = new mongoose.Schema({
 reviewSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'user',
-    select: 'name photo -_id',
-  }).populate({
-    path: 'tour',
-    select: 'name rating -_id',
+    select: 'name photo',
   });
 
   next();
 });
 
-// reviewSchema.post(/^find/, function (reviewModel) {
-//   console.log('Hiiiiii', reviewModel);
-//   reviewModel.__v = undefined;
-//   console.log('Hiiiiii2', reviewModel.__v);
-// });
+reviewSchema.index({ tour: 1 });
 
 module.exports = mongoose.model('Review', reviewSchema);

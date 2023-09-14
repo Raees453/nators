@@ -1,11 +1,12 @@
 const express = require('express');
 const controller = require('../controllers/tourController');
-const {
-  authorize,
-  checkIfUserRoleIsValid,
-} = require('../controllers/authController');
+const reviewRouter = require('../routes/reviewRoutes');
+
+const { authorize } = require('../controllers/authController');
 
 const router = express.Router();
+
+router.use('/:tourId/reviews', reviewRouter);
 
 router
   .route('/')

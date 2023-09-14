@@ -7,6 +7,7 @@ exports.top5Cheap = async (req, res, next) => {
   req.query.limit = 5;
   req.query.page = 1;
   req.query.sort = 'sort=price,-ratingAverage';
+
   next();
 };
 
@@ -29,7 +30,10 @@ exports.getTours = asyncHandler(async (req, res, next) => {
 exports.getTourById = asyncHandler(async (req, res, next) => {
   const id = req.params.id;
 
-  const tour = await Tour.findById(id, '-__v');
+  const tour = await Tour.findById(id).populate({
+    path: 'reviews',
+    select: 'review rating name',
+  });
 
   // TODO
   if (!tour) {
