@@ -1,28 +1,38 @@
 const express = require('express');
-const controller = require('../controllers/tourController');
+const tourController = require('../controllers/tourController');
 const reviewRouter = require('../routes/reviewRoutes');
 
-const { authorize } = require('../controllers/authController');
+const {
+  authorize,
+  checkIfUserRoleIsValid,
+} = require('../controllers/authController');
 
 const router = express.Router();
 
-router.use('/:tourId/reviews', reviewRouter);
+router.use('/:id/reviews', reviewRouter);
+
+router
+  .route('/top-5-cheap')
+  .get(tourController.top5Cheap, tourController.getTours);
 
 router
   .route('/')
-  .get(authorize, controller.getTours)
-  // TODO insert role should be only assigned to admin or lead guide only
-  .post(authorize, controller.addTour);
+  .get(tourController.getTours)
+  .post(
+    authorize,
+    checkIfUserRoleIsValid('admin', 'lead-guide'),
+    tourController.getTourFromBody,
+    tourController.addTour,
+  );
 
-// API Aliasing...
-router
-  .route('/top-5-cheap')
-  .get(authorize, controller.top5Cheap, controller.getTours);
+router.route('/:id').get(tourController.getTourById);
+
+router.use(authorize);
+router.use(checkIfUserRoleIsValid('admin', 'lead-guide'));
 
 router
   .route('/:id')
-  .get(controller.getTourById)
-  .patch(controller.updateTour)
-  .delete(controller.deleteTour);
+  .patch(tourController.updateTour)
+  .delete(tourController.deleteTour);
 
 module.exports = router;

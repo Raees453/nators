@@ -2,6 +2,8 @@ const User = require('../models/userModel');
 const ApiError = require('../utils/api_error');
 const asyncHandler = require('../utils/async_handler');
 
+const factoryHandler = require('../utils/factoryHandler');
+
 const filterUserFromBody = ({ name }) => {
   return {
     name,
@@ -62,3 +64,5 @@ exports.deleteMe = asyncHandler(async (req, res, next) => {
     message: 'User deleted successfully',
   });
 });
+
+exports.getMe = factoryHandler.findOne(User);

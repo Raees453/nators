@@ -18,7 +18,6 @@ const tourSchema = new mongoose.Schema(
     },
     createdAt: { type: Date, default: Date.now(), select: false },
     price: { type: Number, required: [true, 'Tour must have a price'] },
-    rating: { type: Number, default: 4.5 },
     duration: { type: Number, required: [true, 'Tour must have a duration'] },
     maxGroupSize: {
       type: Number,
@@ -28,6 +27,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Tour must have a difficulty level'],
     },
+    ratingsAverage: { type: Number, default: 4.5 },
     ratingsQuantity: { type: Number, default: 0 },
     priceDiscount: Number,
     summary: { type: String, trim: true, required: true },
@@ -69,6 +69,9 @@ const tourSchema = new mongoose.Schema(
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );
+
+tourSchema.index({ price: 1 });
+tourSchema.index({ rating: 1 });
 
 tourSchema.virtual('reviews', {
   ref: 'Review',

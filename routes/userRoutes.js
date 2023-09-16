@@ -14,20 +14,19 @@ router.post('/forgot-password', authController.forgotPassword);
 
 router.patch('/reset-password/:token', authController.resetPassword);
 
-router.patch(
-  '/update-password',
-  authController.authorize,
-  authController.updatePassword,
-);
+router.use(authController.authorize);
 
-router.patch('/update-me', authController.authorize, userController.updateMe);
+router.patch('/update-password', authController.updatePassword);
 
-router.delete('/delete-me', authController.authorize, userController.deleteMe);
+router
+  .route('/:id')
+  .get(userController.getMe)
+  .patch(userController.updateMe)
+  .delete(userController.deleteMe);
 
 router.get(
   '/',
-  authController.authorize,
-  // authController.checkIfUserRoleIsValid('admin'),
+  authController.checkIfUserRoleIsValid('admin', 'lead-guide'),
   usersController.getAllUsers,
 );
 

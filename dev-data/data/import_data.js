@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
 const Tour = require('../../models/tourModel');
+const Review = require('../../models/reviewModel');
+const User = require('../../models/userModel');
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 
@@ -33,7 +35,9 @@ const insert = async () => {
 const clear = async () => {
   try {
     await Tour.deleteMany();
-    console.log('Data deleted Successfully!');
+    await Review.deleteMany();
+    // await User.deleteMany();
+    await console.log('Data deleted Successfully!');
   } catch (error) {
     console.log(error);
   }
